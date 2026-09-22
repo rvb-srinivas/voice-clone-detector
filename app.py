@@ -124,6 +124,77 @@ st.markdown("""
     [data-testid="stMetricDelta"] > div {
         color: #60a5fa !important;
     }
+        /* Step headings with numbered badge */
+    .step-heading {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 1.5rem 0 0.8rem 0;
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #e5e7eb;
+    }
+    .step-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2563eb, #7c3aed);
+        color: white;
+        font-weight: 800;
+        font-size: 1rem;
+        box-shadow: 0 0 12px rgba(37, 99, 235, 0.5);
+        flex-shrink: 0;
+    }
+
+    /* Probability cards (Real/Fake) */
+    .prob-row {
+        display: flex;
+        gap: 16px;
+        margin: 1rem 0;
+    }
+    .prob-card {
+        flex: 1;
+        padding: 1.2rem 1.4rem;
+        border-radius: 14px;
+        background: #1e293b;
+        border: 1px solid rgba(96, 165, 250, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+    .prob-card.real { border-left: 5px solid #10b981; }
+    .prob-card.fake { border-left: 5px solid #ef4444; }
+    .prob-label {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #94a3b8;
+        margin-bottom: 0.4rem;
+    }
+    .prob-value {
+        font-size: 2.4rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+    .prob-card.real .prob-value { color: #34d399; }
+    .prob-card.fake .prob-value { color: #f87171; }
+    .prob-bar {
+        height: 6px;
+        border-radius: 3px;
+        background: #0f172a;
+        margin-top: 0.8rem;
+        overflow: hidden;
+    }
+    .prob-bar-fill-real {
+        height: 100%;
+        background: linear-gradient(90deg, #10b981, #34d399);
+    }
+    .prob-bar-fill-fake {
+        height: 100%;
+        background: linear-gradient(90deg, #ef4444, #f87171);
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -247,7 +318,7 @@ with tab_detect:
 
     with col_left:
         # Step 1: Challenge
-        st.markdown("### Step 1 — Liveness Challenge")
+        st.markdown('<div class="step-heading"><span class="step-badge">1</span> Liveness Challenge</div>', unsafe_allow_html=True)
         if st.session_state.challenge is None:
             st.session_state.challenge = random.choice(CHALLENGES)
         st.markdown(
@@ -259,7 +330,7 @@ with tab_detect:
             st.rerun()
 
         # Step 2: Audio
-        st.markdown("### Step 2 — Submit Audio")
+       st.markdown('<div class="step-heading"><span class="step-badge">2</span> Submit Audio</div>', unsafe_allow_html=True)
         sub1, sub2 = st.tabs(["📁 Upload", "🎙️ Record"])
         audio_bytes = None
         with sub1:
@@ -274,7 +345,7 @@ with tab_detect:
                 st.audio(audio_bytes)
 
         # Step 3: Analyze
-        st.markdown("### Step 3 — Analyze")
+        st.markdown('<div class="step-heading"><span class="step-badge">3</span> Analyze</div>', unsafe_allow_html=True)
         threshold = st.slider("Detection threshold (fake probability)", 0.0, 1.0, 0.5, 0.05)
 
         if audio_bytes and st.button("🔍 Run Detection", type="primary", use_container_width=True):
@@ -305,10 +376,20 @@ with tab_detect:
                         )
 
                     # Metrics
-                    c1, c2 = st.columns(2)
-                    c1.metric("Real", f"{real_p*100:.1f}%")
-                    c2.metric("Fake", f"{fake_p*100:.1f}%")
-                    st.progress(fake_p)
+                    st.markdown(f"""
+                    <div class="prob-row">
+                        <div class="prob-card real">
+                            <div class="prob-label">Real</div>
+                            <div class="prob-value">{real_p*100:.1f}%</div>
+                            <div class="prob-bar"><div class="prob-bar-fill-real" style="width: {real_p*100}%;"></div></div>
+                        </div>
+                        <div class="prob-card fake">
+                            <div class="prob-label">Fake</div>
+                            <div class="prob-value">{fake_p*100:.1f}%</div>
+                            <div class="prob-bar"><div class="prob-bar-fill-fake" style="width: {fake_p*100}%;"></div></div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
                     
                     # --- Audio waveform visualization ---
                     st.markdown("### 🔬 Audio Waveform")
