@@ -50,7 +50,12 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed"
 )
-
+    [data-testid="stMetricValue"] > div {
+        color: #ffffff !important;
+    }
+    [data-testid="stMetricLabel"] > div {
+        color: #cbd5e1 !important;
+    }
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
