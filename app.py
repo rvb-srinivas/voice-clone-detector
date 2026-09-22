@@ -50,12 +50,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed"
 )
-    [data-testid="stMetricValue"] > div {
-        color: #ffffff !important;
-    }
-    [data-testid="stMetricLabel"] > div {
-        color: #cbd5e1 !important;
-    }
+    
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
@@ -116,6 +111,18 @@ st.markdown("""
     
     .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
         font-size: 1.05rem; font-weight: 600; color: #cbd5e1;
+    }
+    
+    /* Metric numbers — bright white on dark theme */
+    [data-testid="stMetricValue"] > div {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+    }
+    [data-testid="stMetricLabel"] > div {
+        color: #cbd5e1 !important;
+    }
+    [data-testid="stMetricDelta"] > div {
+        color: #60a5fa !important;
     }
 </style>
 """, unsafe_allow_html=True)
