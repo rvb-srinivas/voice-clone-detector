@@ -330,7 +330,7 @@ with tab_detect:
             st.rerun()
 
         # Step 2: Audio
-       st.markdown('<div class="step-heading"><span class="step-badge">2</span> Submit Audio</div>', unsafe_allow_html=True)
+        st.markdown('<div class="step-heading"><span class="step-badge">2</span> Submit Audio</div>', unsafe_allow_html=True)
         sub1, sub2 = st.tabs(["📁 Upload", "🎙️ Record"])
         audio_bytes = None
         with sub1:
