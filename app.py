@@ -1,5 +1,6 @@
 import streamlit as st
 import numpy as np
+import librosa
 import joblib
 import tempfile
 import os
@@ -8,7 +9,38 @@ import io
 from datetime import datetime
 from feature_extractor import extract_features
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
+# ------------------------------------------------------------------
+# Waveform plotter
+# ------------------------------------------------------------------
+def plot_waveform(audio_path):
+    """Generates a Plotly waveform from an audio file."""
+    try:
+        y, sr = librosa.load(audio_path, sr=None)
+        duration = len(y) / sr
+        time_axis = np.linspace(0, duration, len(y))
+
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=time_axis, y=y, mode='lines',
+            line=dict(color='#60a5fa', width=0.5),
+            name='Waveform'
+        ))
+        fig.update_layout(
+            title="Audio Waveform",
+            xaxis_title="Time (s)",
+            yaxis_title="Amplitude",
+            height=250,
+            margin=dict(l=0, r=0, t=30, b=0),
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='#e5e7eb')
+        )
+        return fig
+    except Exception as e:
+        st.error(f"Waveform error: {e}")
+        return None
 # ------------------------------------------------------------------
 # Page config + custom CSS
 # ------------------------------------------------------------------
@@ -21,42 +53,64 @@ st.set_page_config(
 
 st.markdown("""
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+    
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Dark grid background */
+    .stApp {
+        background-color: #0a0f1e;
+        background-image: 
+            linear-gradient(rgba(96, 165, 250, 0.06) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(96, 165, 250, 0.06) 1px, transparent 1px);
+        background-size: 30px 30px;
+    }
+
+    h1, h2, h3, h4, p, li, .stMarkdown, label {
+        color: #e5e7eb;
+    }
+
     .main-title {
         font-size: 2.8rem;
         font-weight: 800;
-        background: linear-gradient(90deg, #1e3a8a, #2563eb, #7c3aed);
+        background: linear-gradient(90deg, #60a5fa, #2563eb, #a78bfa);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 0.2rem;
     }
-    .tagline { color: #64748b; font-size: 1.05rem; margin-bottom: 1.5rem; }
-    .card {
-        background: #f8fafc;
-        padding: 1.2rem 1.5rem;
-        border-radius: 12px;
-        border-left: 4px solid #2563eb;
-        margin: 1rem 0;
+    .tagline { color: #94a3b8; font-size: 1.05rem; margin-bottom: 1.5rem; }
+    
+    .challenge-box {
+        background: linear-gradient(135deg, #1e293b, #334155);
+        padding: 1.2rem; border-radius: 12px;
+        border: 1px dashed #60a5fa; font-size: 1.15rem;
+        color: #bfdbfe; font-weight: 600; margin: 0.5rem 0;
     }
+    
     .verdict-real {
-        background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+        background: linear-gradient(135deg, #064e3b, #065f46);
         padding: 1.5rem; border-radius: 12px;
-        border-left: 6px solid #16a34a; font-size: 1.3rem; font-weight: 700;
-        color: #14532d;
+        border-left: 6px solid #10b981; font-size: 1.3rem;
+        font-weight: 700; color: #d1fae5;
     }
     .verdict-fake {
-        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        background: linear-gradient(135deg, #7f1d1d, #991b1b);
         padding: 1.5rem; border-radius: 12px;
-        border-left: 6px solid #dc2626; font-size: 1.3rem; font-weight: 700;
-        color: #7f1d1d;
+        border-left: 6px solid #ef4444; font-size: 1.3rem;
+        font-weight: 700; color: #fee2e2;
     }
-    .challenge-box {
-        background: linear-gradient(135deg, #eff6ff, #dbeafe);
-        padding: 1.2rem; border-radius: 12px;
-        border: 1px dashed #2563eb; font-size: 1.15rem;
-        color: #1e3a8a; font-weight: 600; margin: 0.5rem 0;
-    }
+    
     .stButton>button {
         border-radius: 8px; font-weight: 600;
+        background: linear-gradient(90deg, #2563eb, #7c3aed);
+        color: white; border: none;
+    }
+    .stButton>button:hover { opacity: 0.9; }
+    
+    .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
+        font-size: 1.05rem; font-weight: 600; color: #cbd5e1;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -222,7 +276,7 @@ with tab_detect:
                         challenge_match, transcribed = verify_challenge(
                             tmp_path, st.session_state.challenge
                         )
-                    os.unlink(tmp_path)
+                    
 
                     is_fake = fake_p >= threshold
 
@@ -243,6 +297,14 @@ with tab_detect:
                     c1.metric("Real", f"{real_p*100:.1f}%")
                     c2.metric("Fake", f"{fake_p*100:.1f}%")
                     st.progress(fake_p)
+                    
+                    # --- Audio waveform visualization ---
+                    st.markdown("### 🔬 Audio Waveform")
+                    st.caption("Real voices show natural amplitude variation; AI clones are typically smoother.")
+                    fig_wave = plot_waveform(tmp_path)
+                    if fig_wave:
+                        st.plotly_chart(fig_wave, use_container_width=True)
+
 
                     # Challenge verification result
                     if challenge_match is True:
