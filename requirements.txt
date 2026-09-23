@@ -7,3 +7,5 @@ joblib==1.4.2
 soundfile==0.12.1
 matplotlib==3.9.2
 plotly==5.24.1    
+numba==0.59.1
+llvmlite==0.42.0
