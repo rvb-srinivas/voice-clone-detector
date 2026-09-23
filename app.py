@@ -196,6 +196,27 @@ st.markdown("""
         background: linear-gradient(90deg, #ef4444, #f87171);
     }
 </style>
+    /* Style the Download Report button */
+    div[data-testid="stDownloadButton"] > button {
+        background: linear-gradient(90deg, #1e293b, #334155) !important;
+        color: #60a5fa !important;
+        border: 1px solid #60a5fa !important;
+        border-radius: 8px;
+        font-weight: 600;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+    div[data-testid="stDownloadButton"] > button:hover {
+        background: linear-gradient(90deg, #2563eb, #7c3aed) !important;
+        color: white !important;
+        border: 1px solid #7c3aed !important;
+    }
+
+    /* Optional: Style the audio player background to be dark */
+    audio {
+        filter: invert(100%) hue-rotate(180deg) brightness(1.5);
+        border-radius: 30px;
+    }
 """, unsafe_allow_html=True)
 
 # ------------------------------------------------------------------
