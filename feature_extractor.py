@@ -5,8 +5,12 @@ def extract_features(file_path, sr=16000, n_mfcc=40):
     # Load audio
     y, sr = librosa.load(file_path, sr=sr)
     
-    # CRITICAL: Trim silence from beginning and end
+    # Trim silence
     y, _ = librosa.effects.trim(y, top_db=25)
+    
+    # CRITICAL FIX: Check if audio is empty (mic blocked or silent)
+    if len(y) < 1000: # Less than a fraction of a second
+        raise ValueError("Audio is silent or too short. Please check your microphone permissions and speak clearly for at least 3 seconds.")
     
     # Pad or truncate to exactly 3 seconds
     target_len = int(sr * 3.0)
