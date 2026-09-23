@@ -256,8 +256,13 @@ def verify_challenge(audio_path, expected_phrase):
 # ------------------------------------------------------------------
 # Prediction helper
 # ------------------------------------------------------------------
-def predict(audio_bytes):
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+def predict(audio_bytes, original_filename):
+    # Extract the actual extension (.mp3, .m4a, .wav, etc.)
+    ext = os.path.splitext(original_filename)[1].lower()
+    if not ext:
+        ext = ".wav" # Fallback if no extension is found
+        
+    with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tmp:
         tmp.write(audio_bytes)
         tmp_path = tmp.name
     feats = extract_features(tmp_path).reshape(1, -1)
@@ -330,18 +335,24 @@ with tab_detect:
             st.rerun()
 
         # Step 2: Audio
+                # Step 2: Audio
         st.markdown('<div class="step-heading"><span class="step-badge">2</span> Submit Audio</div>', unsafe_allow_html=True)
         sub1, sub2 = st.tabs(["📁 Upload", "🎙️ Record"])
         audio_bytes = None
+        audio_name = None  # <-- ADD THIS
+        
         with sub1:
             up = st.file_uploader("Upload audio", type=["wav", "mp3", "flac", "ogg", "m4a"], label_visibility="collapsed")
             if up:
                 audio_bytes = up.read()
+                audio_name = up.name  # <-- ADD THIS
                 st.audio(audio_bytes)
+                
         with sub2:
             rec = st.audio_input("Record your response", label_visibility="collapsed")
             if rec:
                 audio_bytes = rec.read()
+                audio_name = rec.name  # <-- ADD THIS
                 st.audio(audio_bytes)
 
         # Step 3: Analyze
@@ -351,7 +362,7 @@ with tab_detect:
         if audio_bytes and st.button("🔍 Run Detection", type="primary", use_container_width=True):
             with st.spinner("Analyzing audio..."):
                 try:
-                    tmp_path, real_p, fake_p = predict(audio_bytes)
+                    tmp_path, real_p, fake_p = predict(audio_bytes, audio_name)
 
                     # Optional challenge verification
                     challenge_match, transcribed = (None, None)
