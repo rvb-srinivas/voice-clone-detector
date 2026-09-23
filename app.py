@@ -257,22 +257,26 @@ def verify_challenge(audio_path, expected_phrase):
 # Prediction helper
 # ------------------------------------------------------------------
 def predict(audio_bytes, original_filename):
-    # Extract the actual extension (.mp3, .m4a, .wav, etc.)
-    ext = os.path.splitext(original_filename)[1].lower()
+    # Safely handle missing filenames from live recording
+    if original_filename and isinstance(original_filename, str):
+        ext = os.path.splitext(original_filename)[1].lower()
+    else:
+        ext = ".wav"  # Default to wav for live recordings
     if not ext:
-        ext = ".wav" # Fallback if no extension is found
+        ext = ".wav"
         
     with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tmp:
         tmp.write(audio_bytes)
         tmp_path = tmp.name
+        
     feats = extract_features(tmp_path).reshape(1, -1)
     if feats.shape[1] != N_FEATURES:
         os.unlink(tmp_path)
         raise ValueError(f"Feature mismatch: got {feats.shape[1]}, expected {N_FEATURES}")
+        
     scaled = scaler.transform(feats)
     proba = model.predict_proba(scaled)[0]
     return tmp_path, float(proba[0]), float(proba[1])
-
 # ------------------------------------------------------------------
 # Feature importance chart
 # ------------------------------------------------------------------
@@ -357,7 +361,7 @@ with tab_detect:
 
         # Step 3: Analyze
         st.markdown('<div class="step-heading"><span class="step-badge">3</span> Analyze</div>', unsafe_allow_html=True)
-        threshold = st.slider("Detection threshold (fake probability)", 0.0, 1.0, 0.5, 0.05)
+        threshold = st.slider("Detection threshold (fake probability)", 0.0, 1.0, 0.75, 0.05)
 
         if audio_bytes and st.button("🔍 Run Detection", type="primary", use_container_width=True):
             with st.spinner("Analyzing audio..."):
