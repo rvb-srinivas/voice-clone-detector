@@ -195,6 +195,29 @@ st.markdown("""
         height: 100%;
         background: linear-gradient(90deg, #ef4444, #f87171);
     }
+        /* ------------------------------------------------ */
+    /* FORCE DOWNLOAD BUTTON STYLING (DARK THEME)       */
+    /* ------------------------------------------------ */
+    div[data-testid="stDownloadButton"] > button,
+    div[data-testid="stDownloadButton"] button,
+    .stDownloadButton button {
+        background-color: #1e293b !important; /* Dark navy background */
+        color: #60a5fa !important;            /* Light blue text */
+        border: 1px solid #60a5fa !important; /* Light blue border */
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        width: 100% !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    /* Hover effect */
+    div[data-testid="stDownloadButton"] > button:hover,
+    div[data-testid="stDownloadButton"] button:hover,
+    .stDownloadButton button:hover {
+        background-color: #2563eb !important; /* Brighter blue on hover */
+        color: #ffffff !important;            /* White text on hover */
+        border-color: #7c3aed !important;     /* Purple border on hover */
+    }
 </style>
    
 """, unsafe_allow_html=True)
